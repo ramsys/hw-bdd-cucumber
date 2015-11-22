@@ -1,4 +1,5 @@
 # Add a declarative step here for populating the DB with movies.
+# require File.expand_path(File.join(File.dirname(__FILE__), ".", "web_steps"))
 
 Given /the following movies exist/ do |movies_table|
   movies_table.hashes.each do |movie|
@@ -26,10 +27,30 @@ When /I (un)?check the following ratings: (.*)/ do |uncheck, rating_list|
   # HINT: use String#split to split up the rating_list, then
   #   iterate over the ratings and reuse the "When I check..." or
   #   "When I uncheck..." steps in lines 89-95 of web_steps.rb
-  fail "Unimplemented"
+  #fail "Unimplemented"
+  rating_list.split(',').each do |rating|
+    if uncheck
+      step %Q{I uncheck "ratings_#{rating.strip}"}
+    else
+      step %Q{I check "ratings_#{rating.strip}"}
+    end
+  end
+end
+
+Given /I only check the following ratings: (.*)/ do |rating_list|
+  Movie.all_ratings.each do |rating|
+    if rating_list.include? rating
+      step %Q{I check "ratings_#{rating}"}
+    else
+      step %Q{I uncheck "ratings_#{rating}"}
+    end
+  end
 end
 
 Then /I should see all the movies/ do
   # Make sure that all the movies in the app are visible in the table
-  fail "Unimplemented"
+  # fail "Unimplemented"
+  # find(:xpath, '//table[@id = "movies"]/tbody/tr').all.rows.should == 10
+  # find('#movies/tbody/tr')
+  expect(page).to have_css('#movies/tbody/tr', count: 10)
 end
